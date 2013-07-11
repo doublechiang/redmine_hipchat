@@ -19,7 +19,7 @@ class NotificationHook < Redmine::Hook::Listener
     data[:room]   = hipchat_room_name(project)
     data[:notify] = hipchat_notify(project)
 
-    send_message(data)
+    send_message_nowait(data)
   end
 
   def controller_issues_edit_after_save(context = {})
@@ -41,7 +41,7 @@ class NotificationHook < Redmine::Hook::Listener
     data[:room]   = hipchat_room_name(project)
     data[:notify] = hipchat_notify(project)
 
-    send_message(data)
+    send_message_nowait(data)
   end
 
   def controller_wiki_edit_after_save(context = {})
@@ -61,7 +61,7 @@ class NotificationHook < Redmine::Hook::Listener
     data[:room]   = hipchat_room_name(project)
     data[:notify] = hipchat_notify(project)
 
-    send_message(data)
+    send_message_nowait(data)
   end
 
   private
@@ -103,6 +103,12 @@ class NotificationHook < Redmine::Hook::Listener
       Rails.logger.info "Asked redmine_hipchat for the url of an unsupported object #{object.inspect}"
     end
   end
+
+# in some invironment, calling hipcat cost too much time.
+  def send_message_nowait(data)
+    new_thread = Thread.new {send_message(data)}
+  end
+
 
   def send_message(data)
     Rails.logger.info "Sending message to HipChat: #{data[:text]}"
